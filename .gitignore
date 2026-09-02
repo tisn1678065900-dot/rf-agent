@@ -16,3 +16,9 @@ uv.lock
 
 .pytest_cache/
 batch.log
+
+# Example scratch output; examples/*/results/ is committed on purpose
+examples/*/out/
+!examples/*/results/*.s3p
+!examples/*/results/*.png
+!examples/*/results/*.dxf

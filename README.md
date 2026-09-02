@@ -27,6 +27,24 @@ whole path.
 > coplanar waveguide over a single ground) are implemented. Everything
 > else is scaffolding waiting for a second device.
 
+## See it work first
+
+[**`examples/wilkinson_11g6/`**](examples/wilkinson_11g6/) is a complete
+recorded run — an 11.6 GHz 1:2 divider taken from one sentence of
+requirement to an EM-verified board, with all 30 HFSS solves, the trial
+history, the S-parameters, the DXF and the generated report committed.
+
+The analytic seed misses the return-loss requirement by 3 dB; 30 trials
+and 24 minutes of solver time fix it. The example also shows the loop
+reporting that its winner passes *by luck* rather than banking the win —
+which is the behaviour worth checking before you trust any of this.
+
+Stage 1 of that example needs no Ansys licence and no Altium:
+
+```bash
+uv run python examples/wilkinson_11g6/01_synthesize.py
+```
+
 ## What it actually does
 
 **Synthesises, rather than templating.** Trace widths come from a

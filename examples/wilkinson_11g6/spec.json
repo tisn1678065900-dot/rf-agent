@@ -1,0 +1,104 @@
+{
+  "name": "wilkinson_1to2_11p6GHz",
+  "device": "wilkinson",
+  "f0_ghz": 11.6,
+  "band_ghz": [
+    10.44,
+    12.76
+  ],
+  "z0": 50.0,
+  "n_way": 2,
+  "stackup": {
+    "laminate": {
+      "name": "RO4350B",
+      "er": 3.66,
+      "tand": 0.0037,
+      "thickness_mm": 0.254,
+      "copper_mm": 0.018,
+      "roughness_um": 0.4
+    },
+    "gap_mm": 0.25,
+    "via_drill_mm": 0.3,
+    "via_pad_mm": 0.6,
+    "via_pitch_mm": 1.2,
+    "via_trace_clear_mm": 0.9,
+    "via_edge_mm": 0.85,
+    "via_fill_pitch_mm": 2.5,
+    "pour_band_mm": null,
+    "fab": {
+      "min_trace_mm": 0.1,
+      "min_gap_mm": 0.1,
+      "min_via_drill_mm": 0.2,
+      "min_via_pad_mm": 0.45,
+      "min_via_to_copper_mm": 0.15,
+      "min_annular_ring_mm": 0.075,
+      "edge_clearance_mm": 0.3
+    }
+  },
+  "max_board_mm": null,
+  "targets": [
+    {
+      "metric": "s11_db",
+      "op": "<=",
+      "limit": -20.0,
+      "band_ghz": null,
+      "weight": 1.0,
+      "hard": true
+    },
+    {
+      "metric": "isolation_db",
+      "op": "<=",
+      "limit": -18.0,
+      "band_ghz": null,
+      "weight": 1.0,
+      "hard": true
+    },
+    {
+      "metric": "output_return_loss_db",
+      "op": "<=",
+      "limit": -16.0,
+      "band_ghz": null,
+      "weight": 0.6,
+      "hard": true
+    },
+    {
+      "metric": "excess_loss_db",
+      "op": "<=",
+      "limit": 0.5,
+      "band_ghz": null,
+      "weight": 0.8,
+      "hard": true
+    },
+    {
+      "metric": "amplitude_imbalance_db",
+      "op": "<=",
+      "limit": 0.3,
+      "band_ghz": null,
+      "weight": 0.5,
+      "hard": true
+    },
+    {
+      "metric": "phase_imbalance_deg",
+      "op": "<=",
+      "limit": 3.0,
+      "band_ghz": null,
+      "weight": 0.3,
+      "hard": false
+    }
+  ],
+  "em": {
+    "delta_s": 0.02,
+    "max_passes": 12,
+    "min_converged_passes": 2,
+    "sweep_points": 201,
+    "sweep_type": "Interpolating",
+    "air_mm": 2.0,
+    "absorber": null,
+    "port_width_mm": null,
+    "port_height_mm": null,
+    "draft_delta_s": 0.05,
+    "draft_max_passes": 6,
+    "draft_sweep_points": 81
+  },
+  "requirement_text": "1:2 Wilkinson LO divider for X-band local-oscillator distribution, GCPW on 0.254 mm RO4350B, in a metal cavity"
+}
