@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rf-agent"
+version = "0.1.0"
+description = "Closed-loop RF hardware design agent: natural-language spec -> parametric layout -> HFSS EM solve -> Optuna optimisation -> Altium PCB, driven over MCP."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = "Apache-2.0"
+keywords = ["rf", "hfss", "pyaedt", "altium", "mcp", "optuna", "eda", "pcb"]
+
+dependencies = [
+    # MCP surface, so an LLM client drives the loop alongside eda-agent's
+    # ~400 Altium tools. Same floors/caps discipline as eda-agent.
+    "mcp>=1.0.0,<2",
+    "pydantic>=2.0,<3",
+    "numpy>=1.24,<3",
+    # Geometry kernel for the layout synthesis: every trace, pour and via
+    # keep-out is a shapely op. Matches what the reference layout scripts proved.
+    "shapely>=2.0,<3",
+    # Touchstone read + network algebra for the metric layer.
+    "scikit-rf>=1.0,<2",
+    # The optimiser. sqlite storage makes a study resumable across sessions.
+    "optuna>=4.0,<5",
+    # HFSS driver. Talks gRPC to a headless ansysedt, so it does not need
+    # to live inside Ansys' own CPython.
+    "pyaedt>=0.11,<2",
+    # DXF is the archival layout artefact and the bridge into AutoCAD/Altium
+    # for anyone not running the live eda-agent bridge.
+    "ezdxf>=1.1,<2",
+]
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.7,<4"]
+dev = ["pytest>=7.0", "pytest-asyncio>=0.21", "matplotlib>=3.7,<4"]
+
+[project.scripts]
+rf-agent = "rf_agent.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rf_agent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

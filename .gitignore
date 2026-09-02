@@ -1,0 +1,18 @@
+.venv/
+scratch/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+uv.lock
+# AEDT and study artefacts never belong in the repo
+*.aedt
+*.aedtresults/
+*.aedb/
+*.lock
+*.s[0-9]p
+*.db
+
+.pytest_cache/
+batch.log
