@@ -53,8 +53,10 @@ improved 4.2 dB, the match moved 860 MHz onto centre, and the balance
 metrics came in 30× and 50× inside their limits.
 
 The winner was then written into a live Altium session over the
-eda-agent bridge and read back to check it: 87 tracks, 41 vias and the
-stitched pour all match the plan, with routed length agreeing to 0.35 %.
+eda-agent bridge and read back to check it: 87 tracks, 41 vias, both
+pours, every net assignment and zero unrouted connections all match the
+plan. Doing that for real is what caught two bugs a dry run cannot —
+a net list joined with the wrong delimiter, and a missing ground plane.
 [Screenshot and the plan-vs-actual record](examples/wilkinson_11g6/#stage-3--into-altium-needs-altium--the-eda-agent-bridge)
 are committed.
 

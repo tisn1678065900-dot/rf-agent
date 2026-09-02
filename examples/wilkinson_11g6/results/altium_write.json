@@ -1,5 +1,5 @@
 {
-  "captured_utc": "2026-09-02T08:47:45+00:00",
+  "captured_utc": "2026-09-02T09:02:06+00:00",
   "altium": "Altium Designer Enterprise 25.4.2",
   "document": "PCB1.PcbDoc",
   "bridge": "eda-agent DelphiScript bridge",
@@ -26,15 +26,26 @@
       2236,
       2256
     ],
-    "polygon": {
-      "x1": 1822,
-      "y1": 1744,
-      "x2": 2236,
-      "y2": 2256,
-      "net": "GND",
-      "layer": "TopLayer",
-      "pour_over": false
-    },
+    "polygons": [
+      {
+        "x1": 1822,
+        "y1": 1744,
+        "x2": 2236,
+        "y2": 2256,
+        "net": "GND",
+        "layer": "TopLayer",
+        "pour_over": false
+      },
+      {
+        "x1": 1822,
+        "y1": 1744,
+        "x2": 2236,
+        "y2": 2256,
+        "net": "GND",
+        "layer": "BottomLayer",
+        "pour_over": true
+      }
+    ],
     "rules": [
       {
         "name": "RF_Clearance_10mil",
@@ -45,20 +56,37 @@
     ]
   },
   "read_back": {
-    "track_count": 87,
-    "via_count": 41,
-    "pad_count": 0,
-    "component_count": 0,
-    "fill_count": 0,
-    "text_count": 0,
-    "polygon_count": 1,
-    "unrouted_connections": 0,
-    "total_trace_length_mils": 882.264167603413,
-    "board_width_mils": 6000,
-    "board_height_mils": 4000,
-    "board_area_sq_mils": 24000000,
-    "layer_count": 2,
-    "board_name": "PCB1.PcbDoc"
+    "board": {
+      "track_count": 87,
+      "via_count": 41,
+      "pad_count": 0,
+      "component_count": 0,
+      "fill_count": 0,
+      "text_count": 0,
+      "polygon_count": 2,
+      "unrouted_connections": 0,
+      "total_trace_length_mils": 882.264167603413,
+      "board_width_mils": 6000,
+      "board_height_mils": 4000,
+      "board_area_sq_mils": 24000000,
+      "layer_count": 2,
+      "board_name": "PCB1.PcbDoc"
+    },
+    "nets": [
+      "GND",
+      "RF_IN",
+      "RF_IN,GND"
+    ],
+    "polygons": [
+      {
+        "Net": "GND",
+        "Layer": "TopLayer"
+      },
+      {
+        "Net": "GND",
+        "Layer": "BottomLayer"
+      }
+    ]
   },
   "verification": [
     {
@@ -75,8 +103,26 @@
     },
     {
       "item": "polygons",
-      "planned": 1,
-      "in_altium": 1,
+      "planned": 2,
+      "in_altium": 2,
+      "match": true
+    },
+    {
+      "item": "unrouted",
+      "planned": 0,
+      "in_altium": 0,
+      "match": true
+    },
+    {
+      "item": "tracks on RF_IN",
+      "planned": 87,
+      "in_altium": 87,
+      "match": true
+    },
+    {
+      "item": "vias on GND",
+      "planned": 41,
+      "in_altium": 41,
       "match": true
     }
   ],

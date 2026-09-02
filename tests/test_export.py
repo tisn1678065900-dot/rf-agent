@@ -68,9 +68,11 @@ def test_write_plan_is_resolvable_without_altium(design):
     for t in plan.tracks:
         assert isinstance(t["width"], int) and t["width"] >= 1
         assert (t["x1"], t["y1"]) != (t["x2"], t["y2"])
-    # the pour is a polygon on the signal layer carrying the ground net
-    assert plan.polygon["net"] == "GND"
-    assert plan.polygon["layer"] == "TopLayer"
+    # the coplanar pour on the signal layer, and the ground plane the
+    # vias drop to -- both on the ground net
+    layers = {g["layer"]: g for g in plan.polygons}
+    assert set(layers) == {"TopLayer", "BottomLayer"}
+    assert all(g["net"] == "GND" for g in plan.polygons)
     # and the clearance rule matches the EM model's coplanar gap
     assert plan.rules[0]["value"] == mm_to_mil(spec.stackup.gap_mm)
 
@@ -159,3 +161,69 @@ def test_electrically_separate_runs_keep_separate_nets(design):
     groups = AltiumWriter._net_groups(detached)
     assert groups[len(g.paths)] != groups[0]
     assert len(set(groups.values())) == 2
+
+
+def test_nets_are_pipe_separated_for_the_bridge(design, monkeypatch):
+    """The bridge splits the net list on "|".
+
+    Joined with a comma instead, the whole list arrives as one net named
+    "RF_IN,GND". Nothing errors: the nets command succeeds, and then every
+    track, via and polygon that asks for "RF_IN" or "GND" fails its lookup
+    silently and lands with no net. The board looks right in Altium and is
+    electrically inert -- the pour does not connect to its own stitching
+    vias. Caught on real hardware, so it is pinned here.
+    """
+    spec, g = design
+    w = AltiumWriter()
+    sent: list[tuple[str, dict]] = []
+
+    class Bridge:
+        def send_command(self, cmd, params, timeout=None):
+            sent.append((cmd, params))
+            return {"ok": True}
+
+    monkeypatch.setattr(AltiumWriter, "preflight", lambda self: {"ok": True})
+    monkeypatch.setattr(type(w), "bridge", property(lambda self: Bridge()))
+    w.write(g, spec)
+
+    nets = next(p for c, p in sent if c == "pcb.create_nets_from_list")["nets"]
+    assert "," not in nets, f"net list must not be comma-joined, got {nets!r}"
+    assert set(nets.split("|")) == {"RF_IN", "GND"}
+
+
+def test_every_track_and_via_carries_a_net(design):
+    """Copper with no net is copper Altium's connectivity engine ignores."""
+    spec, g = design
+    plan = AltiumWriter().plan(g, spec)
+    assert plan.nets, "the plan must declare its nets"
+    assert all(t["net_name"] for t in plan.tracks), "a track has no net"
+    assert all(v["net"] for v in plan.vias), "a via has no net"
+    assert plan.polygons, "no pour at all"
+    assert all(g["net"] for g in plan.polygons), "a pour has no net"
+    # Whatever the tracks and vias claim must be a net the plan creates.
+    used = {t["net_name"] for t in plan.tracks} | {v["net"] for v in plan.vias}
+    used |= {g["net"] for g in plan.polygons}
+    assert used <= set(plan.nets), f"{used - set(plan.nets)} never created"
+
+
+def test_a_ground_plane_is_placed_under_the_board(design):
+    """The EM model sits on a solid conductor at z=0; the board must too.
+
+    Without a bottom-layer plane every stitching via lands on bare
+    laminate, and the coplanar pour stays in the electrically separate
+    islands the traces cut it into -- on this divider, three of them.
+    Altium reported five unrouted GND connections on the first real
+    write for exactly this reason.
+    """
+    spec, g = design
+    plan = AltiumWriter().plan(g, spec)
+    ground = [p for p in plan.polygons if p["layer"] == "BottomLayer"]
+    assert len(ground) == 1, "exactly one ground plane expected"
+    assert ground[0]["net"] == "GND"
+    # It has to span at least the whole routed area, or the vias at the
+    # edges still land on nothing.
+    x1, y1, x2, y2 = plan.outline
+    assert ground[0]["x1"] <= x1 and ground[0]["y1"] <= y1
+    assert ground[0]["x2"] >= x2 and ground[0]["y2"] >= y2
+    # Every via must reach it.
+    assert all(v["net"] == "GND" for v in plan.vias)

@@ -56,7 +56,8 @@ closed, and is worth reading first:
 
 ```
 n_tracks 87   n_vias 41   nets ['RF_IN', 'GND']
-polygon  TopLayer GND 1822,1744 -> 2236,2256
+polygon  TopLayer    GND  1822,1744 -> 2236,2256   (coplanar ground)
+polygon  BottomLayer GND  1822,1744 -> 2236,2256   (ground plane)
 rules    RF_Clearance_10mil (clearance, 10 mil, different_nets)
 ```
 
@@ -64,42 +65,58 @@ To commit you need Altium running with the target PcbDoc open, eda-agent
 installed, and its bridge polling — in Altium: **File → Run Script →
 `Altium_API` → `Dispatcher.pas` → `StartMCPServer`**.
 
-This has been run for real. The screenshot below is the optimised
-divider written into an empty PcbDoc on Altium Designer 25.4.2, and
-[`altium_write.json`](results/altium_write.json) is the plan checked
-against what Altium reports back afterwards:
+This has been run for real, and running it for real is what found two
+bugs that no amount of dry-running would have.
+
+**The board came out electrically inert.** The bridge splits its net
+list on `|`; rf-agent joined it with a comma. Nothing errored — Altium
+cheerfully created a single net named `RF_IN,GND`, after which every
+track, via and pour asking for `RF_IN` or `GND` missed its lookup and
+landed with no net at all. The copper was pixel-perfect and connected
+to nothing.
+
+**There was no ground plane.** The whole EM model rests on a solid
+conductor at z=0 — that is what HFSS's PEC outer boundary *is*, and it
+is what all 41 stitching vias are drilled down to reach. The writer only
+ever placed the top-side coplanar pour, so the vias landed on bare
+laminate, and the top pour stayed in the three electrically separate
+islands its own traces cut it into. Altium reported five unrouted GND
+connections and was right to.
+
+Both are fixed and pinned by tests. After the fix, read back from the
+live board:
 
 | | planned | in Altium | |
 |---|---|---|---|
 | tracks | 87 | 87 | match |
 | vias | 41 | 41 | match |
-| polygons | 1 | 1 | match |
+| pours | 2 | 2 | match |
+| tracks on `RF_IN` | 87 | 87 | match |
+| vias on `GND` | 41 | 41 | match |
+| **unrouted connections** | 0 | **0** | match |
 | routed length | 22.331 mm | 22.410 mm | +0.35 % |
 
-The 0.079 mm of extra copper is the endpoints rounding onto the 25.4 µm
-grid — the same quantisation the design was re-solved against, showing up
-in a second, independent place.
+Every one of the 87 track segments also matches the plan
+coordinate-for-coordinate and width-for-width, and all 41 via positions
+match exactly — zero differences in either direction. The 0.079 mm of
+extra copper is the endpoints rounding onto the 25.4 µm grid, the same
+quantisation the design was re-solved against turning up independently.
 
 <img src="results/altium_written.png" width="620">
 
-Everything in that window came from the spec: 50 Ω feed on the right,
-two 63 Ω arms, two outputs on the left, the via fence tracking each
-trace at its own width-dependent offset, the board-edge ring, the
-stitched GND pour, and a 10 mil clearance rule. No part of it was drawn
-by hand.
+Red is the top-layer coplanar ground, blue the bottom-layer plane
+showing through the gaps. Everything came from the spec: 50 Ω feed on
+the right, two 63 Ω arms, two outputs on the left, the via fence
+tracking each trace at its own width-dependent offset, the board-edge
+ring, and a 10 mil clearance rule. No part of it was drawn by hand.
+[`altium_write.json`](results/altium_write.json) is the full record.
 
-What is *not* there yet, and it matters: the board has **0 pads and 0
-components**. The isolation resistor is a lumped boundary in HFSS, and
-the writer emits only routed tracks, so R1's two solder lands — which
-*are* part of the EM model's copper — never reach Altium. What you get
-instead is a bare gap between the arm ends, because the pour is held
-off that area as a keepout.
-
-So this is a routed, stitched, DRC-ruled RF structure, not yet a
-fabricable PcbDoc. Placing a real 0402 footprint and wiring it to the
-two arms is the remaining step, and it is the step that would also let
-the model carry the part's parasitic inductance instead of assuming it
-away.
+What is still missing, because the screenshot will not tell you: the
+board has **0 pads and 0 components**. The isolation resistor is a
+lumped boundary in HFSS and the writer emits only routed tracks, so
+R1's two solder lands never arrive and the pour keepout leaves a bare
+gap where the chip belongs. This is a routed, stitched, net-clean RF
+structure — not yet a fabricable PcbDoc.
 
 ## What happened
 

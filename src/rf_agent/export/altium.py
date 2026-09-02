@@ -186,7 +186,7 @@ class WritePlan:
     vias: list[dict] = field(default_factory=list)
     nets: list[str] = field(default_factory=list)
     outline: tuple[int, int, int, int] | None = None
-    polygon: dict | None = None
+    polygons: list[dict] = field(default_factory=list)
     rules: list[dict] = field(default_factory=list)
 
     def summary(self) -> dict:
@@ -195,7 +195,7 @@ class WritePlan:
             "n_vias": len(self.vias),
             "nets": self.nets,
             "outline_mils": list(self.outline) if self.outline else None,
-            "polygon": self.polygon,
+            "polygons": self.polygons,
             "rules": self.rules,
         }
 
@@ -209,9 +209,13 @@ class AltiumWriter:
         layer: str = "TopLayer",
         gnd_net: str = "GND",
         timeout: float = 60.0,
+        ground_layer: str = "BottomLayer",
     ):
         self.origin = origin_mils
         self.layer = layer
+        # The reference conductor the stackup is built on. Every via drops
+        # to it and the top pour's islands are tied together through it.
+        self.ground_layer = ground_layer
         self.gnd_net = gnd_net
         self.timeout = timeout
         self._bridge = None
@@ -363,17 +367,35 @@ class AltiumWriter:
                 }
             )
 
-        # The coplanar ground: one polygon over the board on the signal
-        # layer, poured around the RF nets by the clearance rule below.
-        p.polygon = {
-            "x1": p.outline[0],
-            "y1": p.outline[1],
-            "x2": p.outline[2],
-            "y2": p.outline[3],
-            "net": self.gnd_net,
-            "layer": self.layer,
-            "pour_over": False,
-        }
+        # Two pours, and both are load-bearing.
+        #
+        # The signal layer carries the coplanar ground, poured around the
+        # RF nets by the clearance rule below. The traces cut it into
+        # several islands -- on this divider, an upper half, a lower half
+        # and a pocket between the outputs.
+        #
+        # The bottom layer carries the ground plane those islands are tied
+        # together through, and that every stitching via is drilled down
+        # to reach. It is not decoration: the EM model is built on a solid
+        # conductor at z=0, so a board without it is not the board that
+        # was simulated. Omitting it leaves the vias landing on bare
+        # laminate and the top pour in electrically separate pieces.
+        p.polygons = [
+            {
+                "x1": p.outline[0], "y1": p.outline[1],
+                "x2": p.outline[2], "y2": p.outline[3],
+                "net": self.gnd_net,
+                "layer": self.layer,
+                "pour_over": False,
+            },
+            {
+                "x1": p.outline[0], "y1": p.outline[1],
+                "x2": p.outline[2], "y2": p.outline[3],
+                "net": self.gnd_net,
+                "layer": self.ground_layer,
+                "pour_over": True,
+            },
+        ]
 
         gap_mil = max(1, mm_to_mil(spec.stackup.gap_mm))
         p.rules = [
@@ -427,7 +449,12 @@ class AltiumWriter:
                 steps.append({"step": name, "ok": False, "error": f"{type(e).__name__}: {e}"})
                 return None
 
-        step("nets", "pcb.create_nets_from_list", {"nets": ",".join(plan.nets)})
+        # Pipe-separated, not comma. The bridge splits this list on "|",
+        # so a comma-joined string arrives as a single net literally named
+        # "RF_IN,GND" -- which then makes every later lookup of "RF_IN" or
+        # "GND" miss, and every track, via and the pour lands with no net
+        # at all. The copper looks perfect and is electrically inert.
+        step("nets", "pcb.create_nets_from_list", {"nets": "|".join(plan.nets)})
 
         if create_rule:
             for r in plan.rules:
@@ -480,19 +507,19 @@ class AltiumWriter:
             steps = [s for s in steps if s["step"] != "via"]
             steps.append({"step": "vias", "ok": failed == 0, "placed": placed, "failed": failed})
 
-        if place_pour and plan.polygon:
-            g = plan.polygon
-            step(
-                "polygon",
-                "pcb.place_polygon_rect",
-                {
-                    "x1": str(g["x1"]), "y1": str(g["y1"]),
-                    "x2": str(g["x2"]), "y2": str(g["y2"]),
-                    "net": g["net"], "layer": g["layer"],
-                    "pour_over": "false",
-                },
-                timeout=120.0,
-            )
+        if place_pour:
+            for g in plan.polygons:
+                step(
+                    f"polygon:{g['layer']}",
+                    "pcb.place_polygon_rect",
+                    {
+                        "x1": str(g["x1"]), "y1": str(g["y1"]),
+                        "x2": str(g["x2"]), "y2": str(g["y2"]),
+                        "net": g["net"], "layer": g["layer"],
+                        "pour_over": "true" if g["pour_over"] else "false",
+                    },
+                    timeout=120.0,
+                )
 
         step("save", "application.save_all", {}, timeout=120.0)
 
