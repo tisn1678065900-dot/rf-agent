@@ -45,7 +45,8 @@ it from a solved geometry.
    *does*, not that the loop finished.
 
 6. **`rf_export_altium`** — `dry_run=True` first. Look at the
-   quantisation block: Altium's PCB commands take integer mils, and on a
+   quantisation block: Altium's PCB commands take integer mils (25.4 um),
+   and on a
    narrow high-impedance arm that rounding moves the impedance by a
    noticeable fraction of an ohm. The report's "as built" section is the
    honest number. Only then write for real.
@@ -101,4 +102,4 @@ After it lands, `eda-agent` takes over: `pcb_run_drc` to confirm,
 `design_lint_report` for the wider sweep, `pcb_repour_polygons` if the
 pour needs refreshing. The DXF that `rf_design` writes is the
 full-precision copy -- use it for the fab package and for merging into an
-enclosure drawing, not the mil-quantised Altium copper.
+enclosure drawing, not the grid-quantised Altium copper.

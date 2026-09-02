@@ -4,7 +4,7 @@ Optuna proposes dimensions, the fab rules reject the unbuildable ones for
 free, HFSS solves the rest, scikit-rf turns S-parameters into the six
 numbers the spec asks about, and the objective turns those into one loss.
 The winner is then re-solved at full mesh fidelity and again on the
-1-mil Altium grid, because those are two different boards.
+1 mil (25.4 um) Altium grid, because those are two different boards.
 
     uv run python examples/wilkinson_11g6/02_optimize.py --trials 30
 

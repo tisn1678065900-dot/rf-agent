@@ -34,10 +34,29 @@ recorded run — an 11.6 GHz 1:2 divider taken from one sentence of
 requirement to an EM-verified board, with all 30 HFSS solves, the trial
 history, the S-parameters, the DXF and the generated report committed.
 
-The analytic seed misses the return-loss requirement by 3 dB; 30 trials
-and 24 minutes of solver time fix it. The example also shows the loop
-reporting that its winner passes *by luck* rather than banking the win —
-which is the behaviour worth checking before you trust any of this.
+**What it achieved.** The textbook starting point fails: −17.07 dB return
+loss against a −20 dB requirement, with the match sitting 1.1 GHz above
+where it was asked for. Thirty trials and 24 minutes of solver time
+later:
+
+| | analytic seed | after the loop | requirement |
+|---|---|---|---|
+| worst in-band S11 | −17.07 dB ✗ | **−22.72 dB** ✓ | ≤ −20 |
+| match centred at | 12.69 GHz | **11.83 GHz** | 11.6 |
+| isolation | −20.04 dB | −18.43 dB ✓ | ≤ −18 |
+| amplitude imbalance | 0.02 dB | **0.03 dB** ✓ | ≤ 0.3 |
+| phase imbalance | 0.12° | **0.05°** ✓ | ≤ 3.0 |
+
+A working X-band divider that meets every requirement, from one sentence
+of English, with nothing drawn by hand and nobody watching. Return loss
+improved 4.2 dB, the match moved 860 MHz onto centre, and the balance
+metrics came in 30× and 50× inside their limits.
+
+The example is also worth reading for what it *doesn't* do: isolation
+clears by 0.44 dB and only after the widths round onto Altium's
+placement grid, and the report says so in those words instead of
+banking the pass. That is the behaviour to check before trusting any of
+this on a real board.
 
 Stage 1 of that example needs no Ansys licence and no Altium:
 
@@ -73,7 +92,8 @@ reference design that was about 19%.
 
 **Explores cheap, reports honest.** The study runs a draft mesh and a
 short sweep. The winner is re-solved at full fidelity before anything is
-reported. And because Altium's PCB command surface is integer mils, if
+reported. And because Altium's PCB command surface is integer mils
+(1 mil = 25.4 µm), if
 rounding the trace widths onto that grid moves an impedance, the snapped
 geometry is solved *again* — so the report states what the board will do,
 not what the optimiser found.

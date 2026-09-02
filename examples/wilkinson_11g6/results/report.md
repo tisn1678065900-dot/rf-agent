@@ -2,9 +2,9 @@
 
 > 1:2 Wilkinson LO divider for X-band local-oscillator distribution, GCPW on 0.254 mm RO4350B, in a metal cavity
 
-**Result: meets every hard requirement**, verified as built on the 1-mil Altium grid.
+**Result: meets every hard requirement**, verified as built on Altium's 1 mil (25.4 µm) grid.
 
-The continuous-dimension optimum does *not* pass (isolation_db); rounding the widths onto the mil grid moved it back inside the limit. The margin is that thin -- treat this as meeting spec by luck, not by design.
+The continuous-dimension optimum does *not* pass (isolation_db); rounding the widths onto the 25.4 µm grid moved it back inside the limit. The margin is that thin -- treat this as meeting spec by luck, not by design.
 
 ## Requirement
 
@@ -30,9 +30,9 @@ The continuous-dimension optimum does *not* pass (isolation_db); rounding the wi
 
 Deepest input match -32.97 dB at 11.832 GHz.
 
-### As built (widths on the 1-mil Altium grid)
+### As built (widths on Altium's 1 mil = 25.4 µm grid)
 
-The optimiser works in continuous dimensions; Altium's PCB command surface is integer mils. This is the same design re-solved with every trace width rounded to the grid, which is what the board will actually be.
+The optimiser works in continuous dimensions; Altium's PCB command surface is integer mils (1 mil = 25.4 µm). This is the same design re-solved with every trace width rounded to the grid, which is what the board will actually be.
 
 | requirement | limit | as built |  |
 |---|---|---|---|

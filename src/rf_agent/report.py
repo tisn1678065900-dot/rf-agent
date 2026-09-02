@@ -47,7 +47,7 @@ def write_report(result) -> Path:
         judged = ab["compliance"] if ab else ver["compliance"]
         missed = [t["metric"] for t in judged["targets"] if t["hard"] and not t["pass"]]
         which = (
-            "as built on the 1-mil Altium grid" if ab else "on a full-fidelity solve"
+            "as built on Altium's 1 mil (25.4 um) grid" if ab else "on a full-fidelity solve"
         )
         if result.meets_spec:
             L.append(f"**Result: meets every hard requirement**, verified {which}.")
@@ -68,7 +68,7 @@ def write_report(result) -> Path:
                 L.append("")
                 L.append(
                     f"The continuous-dimension optimum does *not* pass "
-                    f"({', '.join(other)}); rounding the widths onto the mil grid moved "
+                    f"({', '.join(other)}); rounding the widths onto the 25.4 um grid moved "
                     f"it back inside the limit. The margin is that thin -- treat this as "
                     f"meeting spec by luck, not by design."
                 )
@@ -76,7 +76,7 @@ def write_report(result) -> Path:
                 L.append("")
                 L.append(
                     "The continuous-dimension optimum passes, but the board that gets "
-                    "built does not. The mil grid is the binding constraint here."
+                    "built does not. The 25.4 um placement grid is the binding constraint here."
                 )
     L.append("")
 
@@ -129,11 +129,11 @@ def write_report(result) -> Path:
 
         ab = ver.get("as_built")
         if ab:
-            L.append("### As built (widths on the 1-mil Altium grid)")
+            L.append("### As built (widths on Altium's 1 mil = 25.4 um grid)")
             L.append("")
             L.append(
                 "The optimiser works in continuous dimensions; Altium's PCB command "
-                "surface is integer mils. This is the same design re-solved with every "
+                "surface is integer mils (1 mil = 25.4 um). This is the same design re-solved with every "
                 "trace width rounded to the grid, which is what the board will actually be."
             )
             L.append("")

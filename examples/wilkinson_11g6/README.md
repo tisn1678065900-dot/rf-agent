@@ -40,8 +40,9 @@ uv run python examples/wilkinson_11g6/02_optimize.py --trials 30
 Optuna proposes dimensions → fab rules reject the unbuildable ones for
 free → HFSS solves the rest → scikit-rf reduces S-parameters to the six
 spec numbers → one scalar loss. The winner is re-solved at full mesh
-fidelity, then again with its widths snapped to Altium's 1-mil grid. The
-study is resumable; re-running with a larger `--trials` continues it.
+fidelity, then again with its widths snapped to Altium's 1 mil (25.4 µm)
+placement grid. The study is resumable; re-running with a larger
+`--trials` continues it.
 
 **Stage 3 — into Altium. Needs Altium + the eda-agent bridge.**
 
@@ -104,32 +105,47 @@ bandwidth.
 <img src="results/layout_optimised.png" width="380">
 <img src="results/sparams.png" width="460">
 
-### The result, stated honestly
+### The result
 
-| requirement | limit | verified | as built on the mil grid |
-|---|---|---|---|
-| S11 | ≤ −20.0 | −21.28 **PASS** | −22.72 **PASS** |
-| isolation | ≤ −18.0 | −17.56 **FAIL** | −18.43 **PASS** |
-| output return loss | ≤ −16.0 | −19.50 PASS | −18.92 PASS |
-| excess loss | ≤ 0.5 | 0.32 PASS | 0.33 PASS |
-| amplitude imbalance | ≤ 0.3 | 0.01 PASS | 0.03 PASS |
-| phase imbalance | ≤ 3.0 | 0.06 PASS | 0.05 PASS |
+| requirement | limit | analytic seed | optimised | as built |
+|---|---|---|---|---|
+| S11 | ≤ −20.0 dB | −17.07 **fails** | **−21.28** | **−22.72** |
+| isolation | ≤ −18.0 dB | −20.04 | −17.56 *(−0.44)* | **−18.43** |
+| output return loss | ≤ −16.0 dB | −21.69 | −19.50 | −18.92 |
+| excess loss | ≤ 0.5 dB | 0.36 | 0.32 | 0.33 |
+| amplitude imbalance | ≤ 0.3 dB | 0.02 | 0.01 | 0.03 |
+| phase imbalance | ≤ 3.0° | 0.12 | 0.06 | 0.05 |
 
-Read that carefully. **No trial met every requirement in continuous
-dimensions** — the best one misses isolation by 0.44 dB, at the very top
-of the band. Rounding the trace widths onto Altium's 1-mil grid nudged it
-back inside the limit.
+*"as built" = the same design re-solved with every trace width snapped to
+Altium's 1 mil (25.4 µm) placement grid, which is the board you actually
+get.*
 
-So the board passes, and it passes by luck. The generated report
-[says so in those words](results/report.md); it does not quietly bank the
-win. Isolation is also the one metric the model is least entitled to
-brag about — the resistors are ideal lumped elements, and a real 0402
-thin-film part has parasitic inductance that costs isolation above about
-10 GHz.
+**The board meets every requirement.** From one sentence of English, with
+no human in the loop, in 24 minutes of solver time: return loss improved
+by 4.2 dB, the match recentred from 12.69 GHz onto 11.83 GHz, and the
+balance metrics land 30× and 50× inside their limits. That is a working
+X-band divider, and nothing about it was drawn by hand.
 
-The honest conclusion is that a single-section Wilkinson is at its limit
+Two things it is worth being precise about, because the report is and
+you should expect that of it:
+
+**Isolation clears by 0.44 dB, and it clears on a technicality.** In
+continuous dimensions the winner *misses* isolation, at the very top of
+the band. Snapping the widths to the 25.4 µm grid moved it back inside.
+The margin is real but it is thin, and it was not designed — it was
+inherited from rounding. The generated report
+[says exactly that](results/report.md) rather than quietly banking the
+win, which is the behaviour you want from a tool that will otherwise
+hand you a board and a PASS.
+
+**Isolation is also the metric this model is least entitled to boast
+about.** The resistors are ideal lumped elements; a real 0402 thin-film
+part carries parasitic inductance that costs isolation above roughly
+10 GHz. The 18.43 dB is an upper bound, not a promise.
+
+The engineering conclusion: a single-section Wilkinson is near its limit
 over a 20 % band. If −18 dB isolation is genuinely hard, the answer is a
-two-section divider, not more trials.
+two-section divider — more trials will not buy it.
 
 ## What is in `results/`
 
