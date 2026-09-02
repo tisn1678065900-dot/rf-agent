@@ -52,11 +52,18 @@ of English, with nothing drawn by hand and nobody watching. Return loss
 improved 4.2 dB, the match moved 860 MHz onto centre, and the balance
 metrics came in 30× and 50× inside their limits.
 
+The winner was then written into a live Altium session over the
+eda-agent bridge and read back to check it: 87 tracks, 41 vias and the
+stitched pour all match the plan, with routed length agreeing to 0.35 %.
+[Screenshot and the plan-vs-actual record](examples/wilkinson_11g6/#stage-3--into-altium-needs-altium--the-eda-agent-bridge)
+are committed.
+
 The example is also worth reading for what it *doesn't* do: isolation
 clears by 0.44 dB and only after the widths round onto Altium's
 placement grid, and the report says so in those words instead of
-banking the pass. That is the behaviour to check before trusting any of
-this on a real board.
+banking the pass. The written board carries no pads or footprints
+either — it is a routed RF structure, not yet a fabricable PcbDoc. That
+is the behaviour to check before trusting any of this on a real board.
 
 Stage 1 of that example needs no Ansys licence and no Altium:
 

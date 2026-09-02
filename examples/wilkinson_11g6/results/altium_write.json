@@ -1,0 +1,112 @@
+{
+  "captured_utc": "2026-09-02T08:47:45+00:00",
+  "altium": "Altium Designer Enterprise 25.4.2",
+  "document": "PCB1.PcbDoc",
+  "bridge": "eda-agent DelphiScript bridge",
+  "origin_mils": [
+    2000,
+    2000
+  ],
+  "optimised_params": {
+    "l_arm": 4.97523,
+    "w_arm": 0.3419,
+    "r_sep": 0.93185,
+    "r_ohms": 126.7027
+  },
+  "planned": {
+    "n_tracks": 87,
+    "n_vias": 41,
+    "nets": [
+      "RF_IN",
+      "GND"
+    ],
+    "outline_mils": [
+      1822,
+      1744,
+      2236,
+      2256
+    ],
+    "polygon": {
+      "x1": 1822,
+      "y1": 1744,
+      "x2": 2236,
+      "y2": 2256,
+      "net": "GND",
+      "layer": "TopLayer",
+      "pour_over": false
+    },
+    "rules": [
+      {
+        "name": "RF_Clearance_10mil",
+        "rule_type": "clearance",
+        "value": 10,
+        "net_scope": "different_nets"
+      }
+    ]
+  },
+  "read_back": {
+    "track_count": 87,
+    "via_count": 41,
+    "pad_count": 0,
+    "component_count": 0,
+    "fill_count": 0,
+    "text_count": 0,
+    "polygon_count": 1,
+    "unrouted_connections": 0,
+    "total_trace_length_mils": 882.264167603413,
+    "board_width_mils": 6000,
+    "board_height_mils": 4000,
+    "board_area_sq_mils": 24000000,
+    "layer_count": 2,
+    "board_name": "PCB1.PcbDoc"
+  },
+  "verification": [
+    {
+      "item": "tracks",
+      "planned": 87,
+      "in_altium": 87,
+      "match": true
+    },
+    {
+      "item": "vias",
+      "planned": 41,
+      "in_altium": 41,
+      "match": true
+    },
+    {
+      "item": "polygons",
+      "planned": 1,
+      "in_altium": 1,
+      "match": true
+    }
+  ],
+  "routed_length_mm": {
+    "geometry": 22.331,
+    "altium": 22.41
+  },
+  "quantisation": {
+    "grid_um": 25.4,
+    "max_position_error_um": 12.7,
+    "widths": [
+      {
+        "width_mm": 0.3419,
+        "width_mil": 13,
+        "snapped_mm": 0.3302,
+        "error_um": -11.7,
+        "z0_ideal": 63.448,
+        "z0_snapped": 64.598,
+        "z0_shift": 1.151
+      },
+      {
+        "width_mm": 0.52385,
+        "width_mil": 21,
+        "snapped_mm": 0.5334,
+        "error_um": 9.55,
+        "z0_ideal": 50.0,
+        "z0_snapped": 49.462,
+        "z0_shift": -0.538
+      }
+    ],
+    "worst_z0_shift_ohm": 1.151
+  }
+}

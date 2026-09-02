@@ -64,6 +64,43 @@ To commit you need Altium running with the target PcbDoc open, eda-agent
 installed, and its bridge polling — in Altium: **File → Run Script →
 `Altium_API` → `Dispatcher.pas` → `StartMCPServer`**.
 
+This has been run for real. The screenshot below is the optimised
+divider written into an empty PcbDoc on Altium Designer 25.4.2, and
+[`altium_write.json`](results/altium_write.json) is the plan checked
+against what Altium reports back afterwards:
+
+| | planned | in Altium | |
+|---|---|---|---|
+| tracks | 87 | 87 | match |
+| vias | 41 | 41 | match |
+| polygons | 1 | 1 | match |
+| routed length | 22.331 mm | 22.410 mm | +0.35 % |
+
+The 0.079 mm of extra copper is the endpoints rounding onto the 25.4 µm
+grid — the same quantisation the design was re-solved against, showing up
+in a second, independent place.
+
+<img src="results/altium_written.png" width="620">
+
+Everything in that window came from the spec: 50 Ω feed on the right,
+two 63 Ω arms, two outputs on the left, the via fence tracking each
+trace at its own width-dependent offset, the board-edge ring, the
+stitched GND pour, and a 10 mil clearance rule. No part of it was drawn
+by hand.
+
+What is *not* there yet, and it matters: the board has **0 pads and 0
+components**. The isolation resistor is a lumped boundary in HFSS, and
+the writer emits only routed tracks, so R1's two solder lands — which
+*are* part of the EM model's copper — never reach Altium. What you get
+instead is a bare gap between the arm ends, because the pour is held
+off that area as a keepout.
+
+So this is a routed, stitched, DRC-ruled RF structure, not yet a
+fabricable PcbDoc. Placing a real 0402 footprint and wiring it to the
+two arms is the remaining step, and it is the step that would also let
+the model carry the part's parasitic inductance instead of assuming it
+away.
+
 ## What happened
 
 ### The analytic seed is not good enough
@@ -156,6 +193,8 @@ two-section divider — more trials will not buy it.
 | [`divider_optimised.s3p`](results/divider_optimised.s3p) | HFSS S-parameters of the winner, 201 points |
 | [`divider.dxf`](results/divider.dxf) | full-precision layout, copper + vias + board outline |
 | `layout_seed.png`, `layout_optimised.png`, `sparams.png` | figures from the run |
+| [`altium_written.png`](results/altium_written.png) | the design written into a live Altium session |
+| [`altium_write.json`](results/altium_write.json) | what was planned vs what Altium reports back |
 
 Two edits were made to these artefacts before publication, both cosmetic:
 the requirement sentence was reworded to drop the name of the programme

@@ -2,7 +2,7 @@
 
 | example | what it shows | needs |
 |---|---|---|
-| [`wilkinson_11g6/`](wilkinson_11g6/) | the whole loop end to end: requirement → layout → HFSS → Optuna → DXF → Altium, with the recorded output of a real 30-solve run | stage 1 nothing, stage 2 HFSS, stage 3 Altium |
+| [`wilkinson_11g6/`](wilkinson_11g6/) | the whole loop end to end: requirement → layout → HFSS → Optuna → DXF → Altium, with the recorded output of a real 30-solve run and the board written into a live Altium session | stage 1 nothing, stage 2 HFSS, stage 3 Altium |
 
 Start with [`wilkinson_11g6/01_synthesize.py`](wilkinson_11g6/01_synthesize.py).
 It runs on any machine in about a second, needs no Ansys licence and no
